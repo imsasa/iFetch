@@ -1,0 +1,29 @@
+{
+  "tags"     : {
+    "allowUnknownTags": true
+  },
+  "source"   : {
+    "include"       : ["./src/"],
+    "includePattern": ".+[.]js?$",
+    "excludePattern": "docs"
+  },
+  "plugins": ["plugins/markdown"],
+  "templates": {
+    "cleverLinks"    : false,
+    "monospaceLinks" : true,
+    "footer"         : "Created by sasa",
+    "navType"        : "vertical",
+    "linenums"       : true,
+    "collapseSymbols": true,
+    "inverseNav"     : false
+  },
+  "opts"     : {
+    "encoding"   : "utf8",
+    "destination": "./dist/docs/",
+    "recurse"    : true,
+    "private"    : false,
+    "search": true,
+    "template": "node_modules/docdash"
+  },
+  "version": "v2.0"
+}
