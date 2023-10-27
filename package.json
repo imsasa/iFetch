@@ -1,0 +1,27 @@
+{
+  "name": "iFetch",
+  "version": "1.0.0",
+  "description": "一个对fetch的封装库",
+  "main": "./src/index.js",
+  "scripts": {
+    "gendoc": "jsdoc -c jsdoc.conf.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imsasa/iaop.git"
+  },
+  "devDependencies": {
+    "babel-plugin-istanbul": "^5.2.0",
+    "cross-env": "^5.2.0",
+    "docdash": "^2.0.2",
+    "istanbul": "^0.4.5",
+    "jsdoc": "^3.6.11",
+    "mochawesome": "^4.1.0",
+    "nyc": "^13.3.0",
+    "assert": "^2.1.0",
+    "mocha": "^10.2.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
