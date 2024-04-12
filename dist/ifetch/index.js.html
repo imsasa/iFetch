@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>index.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IFetch.html">IFetch</a><ul class='methods'><li data-type='method'><a href="IFetch.html#body">body</a></li><li data-type='method'><a href="IFetch.html#get">get</a></li><li data-type='method'><a href="IFetch.html#header">header</a></li><li data-type='method'><a href="IFetch.html#http">http</a></li><li data-type='method'><a href="IFetch.html#off">off</a></li><li data-type='method'><a href="IFetch.html#on">on</a></li><li data-type='method'><a href="IFetch.html#post">post</a></li><li data-type='method'><a href="IFetch.html#url">url</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">index.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>function config($req) {
+    const opt      = {};
+    // ['method', 'headers'].forEach((i) => opt[i] = $req[`_${i}`]);
+    opt['method']  = $req.method;
+    opt['headers'] = $req._headers;
+    if ($req.timeout) {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), $req.timeout);
+        opt.signal = controller.signal;
+    }
+    opt.body = $req.body();
+    return opt;
+}
+
+class IFetch {
+    /**
+     * @constructor
+     * @param {String} $input the resource url
+     * @param {Object} [$opts] http request option,eg,method,headers,baseURL etc.
+     */
+    constructor($input, $opts = {}) {
+        // let evt      = new EventTarget();
+        this.timeout      = $opts.timeout;
+        this.method       = $opts.method;
+        this._body        = $opts.body;
+        this._headers     = new Headers($opts.headers);
+        this._url         = $input;
+        this.baseURL      = $opts.baseURL;
+        const subscribers = {
+            "before-request": [],
+            "after-request" : []
+        };
+        const ths         = this;
+
+        function trigger(subscribers = [], params) {
+            subscribers.forEach(fn => fn.apply(this, params));
+        }
+
+        /**
+         *
+         * add event
+         * @method
+         * @return {Promise&lt;Response|{retmsg, retcode}>}
+         */
+        this.http = async function $http() {
+            const requestCfg = config(this);
+            trigger(subscribers["before-request"], [requestCfg]);
+            const input = `${this.baseURL || this.constructor.baseURL || ''}${this._url}`;
+            ths.loading = true;
+            if (this._headers.get('Content-Type')?.indexOf('json') > 0) {
+                requestCfg.body = JSON.stringify(requestCfg.body);
+            }
+            let rsp = await fetch(input, requestCfg).catch(rsp => {
+                return {retcode: rsp.code || '0000', retmsg: rsp.message || '发送请求发生错误'};
+            });
+            if (this._headers.get('Content-Type')?.indexOf('json') > 0) {
+                rsp = await rsp.json();
+            }
+            if ($opts.parser) {
+                rsp = $opts.parser(rsp);
+            }
+            this.loading = false;
+            trigger(subscribers["after-request"], [rsp]);
+            return rsp;
+        };
+        /**
+         * add event
+         * @method
+         * @param k
+         * @param fn
+         * @return {IFetch}
+         */
+        this.on = function (k, fn) {
+            subscribers[k]?.push(fn);
+            // evt.addEventListener(k, fn);
+            return this;
+        };
+        /**
+         * remove event;
+         * @method
+         * @param k
+         * @param fn
+         * @return {IFetch}
+         */
+        this.off = function (k, fn) {
+            const index = subscribers[k]?.indexOf(fn);
+            if (index > -1) {
+                subscribers[k].splice(index, 1);
+            }
+            return this;
+            // evt.removeEventListener(k, fn);
+        };
+    }
+
+    /**
+     * 设置body，如果什么参数都不传入，则返回body的值，如果传入参数则返回this对象。
+     * 如果K的类型是对象，v的值为true，则用K的值替换body。
+     * @method
+     * @param {Object|String} [k] 设置的body名
+     * @param {Object|String}[v] body的值
+     * @return {*|(function(*, *): (*|{}))|IFetch}
+     */
+    body(k, v) {
+        if (k === undefined &amp;&amp; v === undefined) return this._body;
+        if (!this._body) {
+            this._body = {};
+        }
+        const body = this._body;
+        if (arguments.length &lt; 2 &amp;&amp; typeof k === 'string') {
+            return body &amp;&amp; body[k];
+        }
+
+        if (typeof k === 'string') {
+            body[k] = v;
+        } else {
+            // 如果v为ture，则用v覆盖原来的body值
+            v ? this._body = k : Object.assign(body, k);
+        }
+        return this;
+    }
+
+    /**
+     * 设置header，如果什么参数都不传入，则返回header的值，如果传入参数则返回this对象。
+     * 如果K的类型是对象，v的值为true，则用K的值替换body
+     * @method
+     * @param {Object|String} [k] 设置的header名
+     * @param {Object|String}[v]  设置的body名
+     * @return {*|(function(*, *): (*|{}))|IFetch}
+     */
+    header(k, v) {
+        if (arguments.length === 2) {
+            this._headers.set(k, v);
+            return this;
+        }
+        if (arguments.length === 1) {
+            if (typeof k === 'object') {
+                // 如果提供了一个对象，遍历该对象并设置多个头部信息
+                for (const [key, value] of Object.entries(k)) {
+                    this._headers.set(key, String(value));
+                }
+                return this;
+            } else {
+                // 如果提供了一个字符串，返回该键对应的值
+                return this._headers.get(k);
+            }
+        }
+        return this._headers;
+    }
+
+    /**
+     * 设置或获取请求的URL
+     * @method
+     * @param {String} $url
+     * @return {any}
+     */
+    url($url) {
+        if (!$url) return this._url;
+        this._url = $url;
+        return this;
+    }
+
+    /**
+     * 发起post请求
+     * @method
+     * @param {Object|String} [$data]
+     * @param {String} [$url]
+     * @return {Promise&lt;Response|{retmsg, retcode}>}
+     */
+    post($data, $url) {
+        if ($data) {
+            this.body($data);
+        }
+        if ($url) {
+            this.url($url);
+        }
+        this.method = "POST";
+        if (!this._headers.has('Content-Type')) {
+            this._headers.set('Content-Type', "application/json;charset=utf-8");
+        }
+        return this.http();
+    }
+
+    /**
+     * 发起get请求
+     * @method
+     * @param {Object|String} [$params]
+     * @param {String} [$url]
+     * @return {Promise&lt;Response|{retmsg, retcode}>}
+     */
+    get($params, $url) {
+        if ($url) {
+            this.url($url);
+        }
+        let queryString = "";
+        if ($params) {
+            const searchParams = new URLSearchParams($params);
+            queryString        = `?${searchParams.toString()}`;
+        }
+        this.method = "GET";
+        return this.http(`${this._url}${queryString}`);
+    }
+
+    // link($vm) {
+    //     this.constructor.link(this, $vm);
+    //     return this;
+    // }
+    // static link($req, $vm) {
+    //     $req.on('before-request', () => {
+    //         $vm.loading = true;
+    //     });
+    //     $req.on('after-request', (rsp) => {
+    //         $vm.loading = false;
+    //         $vm.set &amp;&amp; $vm.set(rsp);
+    //     });
+    //     return this;
+    // }
+}
+
+// export class Post extends IFetch {
+//     constructor($input, $opts = {method: "POST"}) {
+//         super($input, $opts);
+//         this.method = "POST";
+//         // if (!this.headers.has('Content-Type')) {
+//         //     this.headers.set('Content-Type', "application/json;charset=utf-8");
+//         // }
+//         // let headers = new Headers(this.headers);
+//         // debugger;
+//     }
+//
+//     static baseURL = ''
+// }
+export default IFetch</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Fri Oct 27 2023 21:11:48 GMT+0800 (Central Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>request.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Fetch.html">Fetch</a><ul class='methods'><li data-type='method'><a href="Fetch.html#.get">get</a></li><li data-type='method'><a href="Fetch.html#.on">on</a></li><li data-type='method'><a href="Fetch.html#.post">post</a></li><li data-type='method'><a href="Fetch.html#.send">send</a></li><li data-type='method'><a href="Fetch.html#get">get</a></li><li data-type='method'><a href="Fetch.html#on">on</a></li><li data-type='method'><a href="Fetch.html#post">post</a></li><li data-type='method'><a href="Fetch.html#send">send</a></li></ul></li><li><a href="Request.html">Request</a><ul class='methods'><li data-type='method'><a href="Request.html#data">data</a></li><li data-type='method'><a href="Request.html#headers">headers</a></li><li data-type='method'><a href="Request.html#toRequest">toRequest</a></li><li data-type='method'><a href="Request.html#url">url</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-htp.html">htp</a><ul class='methods'><li data-type='method'><a href="module-htp.html#~defineFetch">defineFetch</a></li></ul></li><li><a href="module-request.html">request</a><ul class='methods'><li data-type='method'><a href="module-request.html#~defineRequest">defineRequest</a></li></ul></li><li><a href="module-sub.html">sub</a><ul class='methods'><li data-type='method'><a href="module-sub.html#.emit">emit</a></li><li data-type='method'><a href="module-sub.html#.off">off</a></li><li data-type='method'><a href="module-sub.html#.on">on</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">request.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file request.js
+ * @module request
+ * @description This is the main file of the request module.
+ */
+import parseHttpReq from './parse-http-req.js'
+
+function headersOper($headers, flagOverride) {
+    if (arguments.length !== 0 &amp;&amp; $headers) {
+        const headers         = this.opts.headers;
+        const $headersEntries = Array.isArray($headers) ? $headers : Object.entries($headers);
+        flagOverride !== true ? $headersEntries.forEach(([k, v]) => headers.set(k, v)) : this.opts.headers = new Headers($headersEntries);
+        return this;
+    } else {
+        return this.opts.headers;
+    }
+}
+
+function toRequest(data, opts={}) {
+    try {
+        // data = processData(data, this.headers(), this);
+        if (data === undefined) {
+            data = this.body;
+        }
+        // 应用请求拦截器
+        let interceptors = [...this.interceptors, ...this.constructor.interceptors];
+        for (const interceptor of interceptors) {
+            data = interceptor.apply(this, [data, this.headers(), this]);
+        }
+        if (this.parser) {
+            data = this.parser.call(this, data || this.body);
+        }
+        data = parseHttpReq(this.headers.get('Content-Type'), data);
+    } catch (e) {
+         throw new Error(e.message || 'bad request info');
+    }
+    let url         = this.url() || this.constructor.url;
+    let contentType = this.headers().get('Content-Type');
+    if (contentType === 'application/x-www-form-urlencoded') {
+        url += `?${data}`;
+        opts = Object.assign({}, this.constructor.opts, opts);
+    } else {
+        opts = Object.assign({}, this.constructor.opts, {body: data},opts);
+    }
+    return new Request(url, opts);
+}
+
+/**
+ * @class
+ * @alias Request
+ * @description This is the main class of the request module.
+ */
+
+class Cls {
+    /**
+     *
+     * @param $data
+     * @param $headers
+     * @param fetor
+     * @param $opts
+     */
+    constructor($data = {}, {headers: $headers, fetor, ...$opts} = {}) {
+        let ths = this;
+        Object.defineProperty(this, 'interceptors', {
+            value: [], writable: false, enumerable: false, configurable: false
+        });
+        let url, data = $data;
+        /**
+         * Gets or sets the URL for the request.
+         * @param {*} $url
+         * @returns {string|this}
+         */
+        this.url = $url => $url ? (url = $url, ths) : url;
+        let {headers: defaultHeaders, ...defaultOpts} = this.constructor.opts;
+        this.opts                                     = Object.assign($opts, defaultOpts);
+        this.opts.headers                             = new Headers(defaultHeaders.entries());
+        this.headers($headers);
+         /**
+         * Gets or sets the body data for the request.
+         * @param {Object} [$data]
+         * @param {*} flagOverride
+         * @returns {Object|this}
+         */
+        this.data = ($data, flagOverride) => {
+            if (arguments.length !== 0) {
+                flagOverride !== true ? Object.assign(data, $data) : data = $data;
+                return this;
+            } else {
+                return data;
+            }
+        };
+    }
+
+    /**
+     * @method
+     * @type {function(*, *): (this)}
+     */
+    headers               = headersOper;
+    /**
+     * Converts the data to a Request object.
+     * @method
+     * @param {object} [data] - The data for the request.
+     * @returns {Request} - The Request object.
+     */
+    toRequest;
+    /**
+     *
+     * @param d
+     */
+    static parser         = d => d;
+    static responseParser = d => d;
+    static headers        = headersOper;
+    /**
+     * toRequest是类的表态方法
+     *
+     **/
+    static toRequest      = toRequest;
+}
+
+
+/**
+ * Creates a request class.
+ * @function
+ * @name defineRequest
+ * @param {string} $url  - The URL for the request.
+ * @param {object} $opts - The options for the request.
+ * @returns {Request} - The request class.
+ */
+
+export default function defineRequest($url, $opts = {}) {
+    const {parser, responseParser, interceptors, fetor, ...opts} = $opts;
+    opts.method || (opts.method = 'GET');
+    if (!(opts.headers instanceof Headers)) {
+        opts.headers = new Headers(Array.isArray(opts.headers) ? opts.headers : Object.entries(opts.headers));
+    }
+    if (!opts.headers.has('Content-Type')) {
+        opts.method === 'GET' ? opts.headers.set('Content-Type', 'application/x-www-form-urlencoded') : opts.headers.set('Content-Type', 'application/json');
+    }
+    let url = $url;
+    class _ extends Cls {
+        static opts         = opts;
+        static interceptors = interceptors || [];
+        url($url) {
+            return $url ? (url = $url, this) : url;
+        }
+        parser              = parser;
+    }
+
+    parser &amp;&amp; (_.parser = parser);
+    responseParser &amp;&amp; (_.responseParser = responseParser);
+    return _;
+};
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Thu Apr 11 2024 20:27:14 GMT+0800 (中国标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
