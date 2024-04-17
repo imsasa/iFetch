@@ -9,7 +9,7 @@
   },
   "plugins": ["plugins/markdown"],
   "templates": {
-    "cleverLinks"    : false,
+    "cleverLinks"    : true,
     "monospaceLinks" : true,
     "footer"         : "Created by sasa",
     "navType"        : "vertical",
@@ -20,8 +20,8 @@
   "opts"     : {
     "encoding"   : "utf8",
     "destination": "./dist/docs/",
-    "recurse"    : true,
-    "private"    : false,
+    "recurse"    : false,
+    "private"    : true,
     "search": true,
     "template": "node_modules/docdash"
   },

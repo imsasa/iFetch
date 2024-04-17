@@ -1,10 +1,9 @@
 /**
- * @file htp.js
  * @module htp
  * @description This is the main file of the htp module.
  */
 
-import {on as $$on, emit as $$emit} from './sub.js';
+import {on as $$on, emit as $$emit} from './utils.js';
 import resolveHttpResponse          from './resolve-http-res.js';
 
 function createController(tim) {
@@ -13,48 +12,32 @@ function createController(tim) {
     return controller.signal;
 }
 
-
-
-function bindReq($req, isSingle) {
-    let ths = this;
-    const _ = function (data, info) {
-        const req = isSingle !== false ? $req.data(data).toRequest() : $req.toRequest(data);
-        return ths.send(req, info || data);
-    };
-
-    function getter(target, key, receiver) {
-        return key === 'send' ? _ : target[key];
-    }
-
-    return new Proxy(ths, {get: getter});
-}
-
 /**
  * @private
  * @description 这是一个包含通用方法的对象。
  */
 const proto = {
     /**
-     * @method Fetch#on
+     * @method Ift#on
      * @see module:sub.on
      */
     /**
-     * @method Fetch.on
+     * @method Ift.on
      * @see module:sub.on
      */
     on: $$on,
 
     /**
     * The send function.
-    * @method Fetch.send
+    * @method Ift.send
     * @param $req
     * @param info
     * @return {Promise<{code: number, message}|*>}
     */
    /**
     * The send function.
-    * @method Fetch#send
-    * @see Fetch#send
+    * @method Ift#send
+    * @see Ift#send
     */
     send: async function ($req, info) {
        let ths = this, opt = {}, ret;
@@ -94,37 +77,36 @@ const proto = {
        });
        Reflect.apply($$emit, ths, ['complete', [ret, info, this, req]]);
        return ret;
-   }
-   ,
+   },
 
     /**
      * The get function.
-     * @function Fetch.get
+     * @function Ift.get
      * @param {any} data - The data parameter.
      * @returns {any} The result of the send function with method 'GET'.
      */
     /**
-    * The send function.
-    * @method Fetch#get
-    * @see Fetch.get
+    * The get .
+    * @method Ift#get
+    * @see Ift.get
     */
-    get: function (data) {
-        return this.send(data, {method: 'GET'});
+    get: function (req) {
+        return this.send(req, {method: 'GET'});
     },
 
     /**
      * The post function.
-     * @function Fetch.post
+     * @function Ift.post
      * @param {any} data - The data parameter.
      * @returns {any} The result of the send function with method 'POST'.
      */
     /**
     * The send function.
-    * @method Fetch#post
-    * @see Fetch.post
+    * @method Ift#post
+    * @see Ift.post
     */
-    post: function (data) {
-        return this.send(data, {method: 'POST'});
+    post: function (req) {
+        return this.send(req, {method: 'POST'});
     },
 
     // /**
@@ -138,36 +120,21 @@ const proto = {
     // * @see Fetch.bindReq
     // */
 
-    // /**
-    //  * The link function.
-    //  * @function Fetch.link
-    //  * @param {any} $vm - The $vm parameter.
-    //  * @returns {this} The updated Proto object.
-    //  */
+  
     // /**
     // * The send function.
     // * @method Fetch#link
     // * @see Fetch.link
     // */
-    // link($vm) {
-    //     this.on('before', () => $vm.loading = true);
-    //     this.on('complete', () => $vm.loading = false);
-    //     this.on('success', rsp => $vm.set && $vm.set(rsp));
-    //     return this;
-    // }
-}
 
-/**
- * @class
- * @alias Fetch
- * @description This is the main class of the request module.
- */
-class DefaultFetch {
+}
+export  default class Ift {
     static parser = undefined;
     resolver;
-
     /**
-     *
+     * @description This is the main class of the request module.
+     * @constructor
+     * @name Htp
      * @param timeout
      * @param parser
      * @param opts
@@ -178,26 +145,5 @@ class DefaultFetch {
     }
 }
 
-Object.assign(DefaultFetch, proto);
-Object.assign(DefaultFetch.prototype, proto);
-/**
- * 全局方法，全来创建一个Fetch类
- * @function
- * @name defineFetch
- * @param resolver
- * @param timeout
- * @param {Object} opts
- * @returns {Fetch}
- */
-export default function defineFetch({resolver, timeout, ...opts} = {}) {
-    class _ extends DefaultFetch {
-        constructor(opts = {}) {
-            super(opts);
-        }
-
-        static timeout  = timeout;
-        static resolver = resolver;
-    }
-
-    return _;
-};
+Object.assign(Ift, proto);
+Object.assign(Ift.prototype, proto);
