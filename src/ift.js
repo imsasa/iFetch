@@ -7,6 +7,7 @@ import {on as $$on, emit as $$emit} from './utils.js';
 import resolveHttpResponse          from './resolve-http-res.js';
 
 function createController(tim) {
+    if(tim === undefined)return;
     const controller = new AbortController();
     setTimeout(() => controller.abort(), tim);
     return controller.signal;
@@ -16,7 +17,7 @@ function createController(tim) {
  * @private
  * @description 这是一个包含通用方法的对象。
  */
-const proto = {
+const Ift = {
     /**
      * @method Ift#on
      * @see module:sub.on
@@ -44,14 +45,12 @@ const proto = {
        let req = req.toRequest ? $req.toRequest() : $req;
        if (!req) {
            let info = {code: 400, message: e.message};
-           Reflect.apply($$emit, ths, ['fail', info]);
+           Reflect.apply($$emit, ths, ['fail', [info,$req]]);
            return info;
        }
        info = info === undefined ? $req : info;
        Reflect.apply($$emit, ths, ['start', [req, info, ths]]);
-       if(this.timeout){
-            opt.signal = createController(this.timeout)
-       }
+       opt.signal = createController(this.timeout)
        ret = await fetch(req, opt).then(async (rsp) => {
            /**
             * 基础解析，解析http请求的返回结果
@@ -108,42 +107,54 @@ const proto = {
     post: function (req) {
         return this.send(req, {method: 'POST'});
     },
-
-    // /**
-    //  * The bindReq function.
-    //  * @function Fetch.bindReq
-    //  * @type {Function}
-    //  */
-    // /**
-    // * The send function.
-    // * @method Fetch#bindReq
-    // * @see Fetch.bindReq
-    // */
-
-  
-    // /**
-    // * The send function.
-    // * @method Fetch#link
-    // * @see Fetch.link
-    // */
-
 }
-export  default class Ift {
-    static parser = undefined;
-    resolver;
-    /**
-     * @description This is the main class of the request module.
-     * @constructor
-     * @name Htp
-     * @param timeout
-     * @param parser
-     * @param opts
-     */
-    constructor({timeout, parser, ...opts} = {}) {
-        this.timeout  = timeout || this.constructor.timeout;
-        this.resolver = this.resolver || this.constructor.resolver;
+
+// export  default class Ift {
+//     static parser = undefined;
+//     resolver;
+//     constructor({timeout, parser, ...opts} = {}) {
+//         this.timeout  = timeout || this.constructor.timeout;
+//         this.resolver = this.resolver || this.constructor.resolver;
+//     }
+// }
+
+// Object.assign(Ift, proto);
+// Object.assign(Ift.prototype, proto);
+// /**
+//  * 全局方法，全来创建一个Htp类
+//  * @param resolver
+//  * @param timeout
+//  * @param {Object} opts
+//  * @return {Ift}
+//  */
+// export  function defineIFetch({resolver, timeout, ...opts} = {}) {
+//     class _ extends Ift {
+//         constructor(opts = {}) {
+//             super(opts);
+//         }
+
+//         static timeout  = timeout;
+//         static resolver = resolver;
+//     }
+
+//     return _;
+// }
+
+/**
+ * @description This is the main class of the request module.
+ * @class
+ * @param timeout
+ * @param parser
+ * @param opts
+ */
+
+export default function defineIFetch({resolver, timeout, ...opts} = {}) {
+    let ift = Object.create(Ift);
+    if(timeout){
+        ift.timeout = timeout;
     }
+    if(resolver){
+        ift.resolver = resolver;
+    }
+    return ift;
 }
-
-Object.assign(Ift, proto);
-Object.assign(Ift.prototype, proto);

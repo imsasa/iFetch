@@ -7,18 +7,17 @@
 import parseHttpReq from './parse-http-req.js'
 
 /**
- *
+ * @ignore
  * @param $url
  * @return {String|Req}
  */
 function url($url){
     if($url) REQ_URLS.set(this,$url);
-    REQ_URLS.get(this);
-    return $url ? this:$url;
+    return $url ? this:REQ_URLS.get(this);
 }
 
 /**
- *
+ * @ignore
  * @param $data
  * @param overrideFlag
  * @return {data|any}
@@ -102,12 +101,11 @@ const REQ_URLS=new WeakMap();
  */
 class Req {
 
-    constructor($url,{headers: $headers, data:$data,fetor, ...$opts} = {}) {
+    constructor($data,{headers: $headers,fetor, ...$opts} = {}) {
         Object.defineProperty(this, 'interceptors', {
             value: [], writable: false, enumerable: false, configurable: false
         });
         REQ_DATA.set(this,$data);
-        REQ_URLS.set(this,$url);
         let {headers: defaultHeaders, ...defaultOpts} = this.constructor.opts;
         this.opts                                     = Object.assign($opts, defaultOpts);
         this.opts.headers                             = new Headers(defaultHeaders.entries());
@@ -131,11 +129,11 @@ class Req {
            return data.call(this,$data,overrideFlag);
     }
     /**
-     * @param {*} $url
+     * @param {*} [$url]
      * @returns {string|this}
      */
     url($url){
-        return url.call(this,$url);
+        return url.call(this,$url)||this.constructor.url();
     }
     /**
      *
@@ -199,16 +197,22 @@ class Req {
     static  toRequest(data, opts={}){
         return toRequest.call(this,data,opts);
     };
+    /**
+     * @param {*} [$url]
+     * @returns {string|this}
+     */
+    static url($url){
+        return url.call(this,$url);
+    }
 }
 export default Req;
 
 
 /**
  * Creates a request class.
- * @function
  * @param {string} $url  - The URL for the request.
  * @param {object} $opts - The options for the request.
- * @return {Request} - The request class.
+ * @return {Req} - The request class.
  */
 export function defineRequest($url, $opts = {}) {
     let {parser, responseParser, interceptors, fetor, ...opts} = $opts;

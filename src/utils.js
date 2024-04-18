@@ -73,25 +73,7 @@ export function link(vm,htp) {
     htp.on('complete', () => vm.loading = false);
     htp.on('success', rsp => vm.set && vm.set(rsp));
 }
-/**
- * 全局方法，全来创建一个Htp类
- * @param resolver
- * @param timeout
- * @param {Object} opts
- * @return {Ift}
- */
-export  function defineIFetch({resolver, timeout, ...opts} = {}) {
-    class _ extends Ift {
-        constructor(opts = {}) {
-            super(opts);
-        }
 
-        static timeout  = timeout;
-        static resolver = resolver;
-    }
-
-    return _;
-}
 
 
 

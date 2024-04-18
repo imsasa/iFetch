@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>htp.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-htp-Htp.html">Htp</a></li><li><a href="module-req-Req.html">Req</a><ul class='methods'><li data-type='method'><a href="module-req-Req.html#.parser">parser</a></li><li data-type='method'><a href="module-req-Req.html#data">data</a></li><li data-type='method'><a href="module-req-Req.html#responseParser">responseParser</a></li><li data-type='method'><a href="module-req-Req.html#toRequest">toRequest</a></li><li data-type='method'><a href="module-req-Req.html#url">url</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-htp.html">htp</a></li><li><a href="module-req.html">req</a></li><li><a href="module-utils.html">utils</a><ul class='methods'><li data-type='method'><a href="module-utils.html#.bind">bind</a></li><li data-type='method'><a href="module-utils.html#.defineIFetch">defineIFetch</a></li><li data-type='method'><a href="module-utils.html#.defineRequest">defineRequest</a></li><li data-type='method'><a href="module-utils.html#.emit">emit</a></li><li data-type='method'><a href="module-utils.html#.link">link</a></li><li data-type='method'><a href="module-utils.html#.off">off</a></li><li data-type='method'><a href="module-utils.html#.on">on</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">htp.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module htp
+ * @description This is the main file of the htp module.
+ */
+
+import {on as $$on, emit as $$emit} from './utils.js';
+import resolveHttpResponse          from './resolve-http-res.js';
+
+function createController(tim) {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), tim);
+    return controller.signal;
+}
+
+/**
+ * @private
+ * @description 这是一个包含通用方法的对象。
+ */
+const proto = {
+    /**
+     * @method Htp#on
+     * @see module:sub.on
+     */
+    /**
+     * @method Htp.on
+     * @see module:sub.on
+     */
+    on: $$on,
+
+    /**
+    * The send function.
+    * @method Htp.send
+    * @param $req
+    * @param info
+    * @return {Promise&lt;{code: number, message}|*>}
+    */
+   /**
+    * The send function.
+    * @method Htp#send
+    * @see Htp#send
+    */
+    send: async function ($req, info) {
+       let ths = this, opt = {}, ret;
+       let req = req.toRequest ? $req.toRequest() : $req;
+       if (!req) {
+           let info = {code: 400, message: e.message};
+           Reflect.apply($$emit, ths, ['fail', info]);
+           return info;
+       }
+       info = info === undefined ? $req : info;
+       Reflect.apply($$emit, ths, ['start', [req, info, ths]]);
+       if(this.timeout){
+            opt.signal = createController(this.timeout)
+       }
+       ret = await fetch(req, opt).then(async (rsp) => {
+           /**
+            * 基础解析，解析http请求的返回结果
+            */
+           let ret = await resolveHttpResponse(rsp, ths);
+           /**
+            * 针对接口的数据解析，如果在请求对象中定义了responseResolver，则使用请求对象中的responseResolver
+            */
+           if ($req.resolver) {
+               ret = await $req.resolver.apply($req, [ret, info]);
+           }
+           /**
+            * 针对具体请求操作的解析
+            */
+           if (ths.resolver) {
+               ret = await ths.resolver.apply(this, [ret, info, req]);
+           }
+           Reflect.apply($$emit, ths, ['success', [req, info, ths]]);
+           return ret;
+       }).catch(e => {
+           Reflect.apply($$emit, ths, ['fail', [{code: '0000', message: e.message}, info, this, req]]);
+           return ret;
+       });
+       Reflect.apply($$emit, ths, ['complete', [ret, info, this, req]]);
+       return ret;
+   },
+
+    /**
+     * The get function.
+     * @function Htp.get
+     * @param {any} data - The data parameter.
+     * @returns {any} The result of the send function with method 'GET'.
+     */
+    /**
+    * The get .
+    * @method Htp#get
+    * @see Htp.get
+    */
+    get: function (data) {
+        return this.send(data, {method: 'GET'});
+    },
+
+    /**
+     * The post function.
+     * @function Htp.post
+     * @param {any} data - The data parameter.
+     * @returns {any} The result of the send function with method 'POST'.
+     */
+    /**
+    * The send function.
+    * @method Htp#post
+    * @see Htp.post
+    */
+    post: function (data) {
+        return this.send(data, {method: 'POST'});
+    },
+
+    // /**
+    //  * The bindReq function.
+    //  * @function Fetch.bindReq
+    //  * @type {Function}
+    //  */
+    // /**
+    // * The send function.
+    // * @method Fetch#bindReq
+    // * @see Fetch.bindReq
+    // */
+
+  
+    // /**
+    // * The send function.
+    // * @method Fetch#link
+    // * @see Fetch.link
+    // */
+
+}
+export  default class Htp {
+    static parser = undefined;
+    resolver;
+    /**
+     * @description This is the main class of the request module.
+     * @constructor
+     * @name Htp
+     * @param timeout
+     * @param parser
+     * @param opts
+     */
+    constructor({timeout, parser, ...opts} = {}) {
+        this.timeout  = timeout || this.constructor.timeout;
+        this.resolver = this.resolver || this.constructor.resolver;
+    }
+}
+
+Object.assign(Htp, proto);
+Object.assign(Htp.prototype, proto);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Tue Apr 16 2024 10:21:02 GMT+0800 (China Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>
