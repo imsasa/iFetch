@@ -12,11 +12,12 @@ const cache4subs = new WeakMap();
  * @param k
  * @param fn
  */
-export function on(k,fn){
-    if(!cache4subs[this]){
-        cache4subs[this] = new Subscribers();
+export function on(k,fn,ctx){
+    ctx||(ctx = this);
+    if(!cache4subs[ctx]){
+        cache4subs[ctx] = new Subscribers();
     }
-    const sub= cache4subs[this];
+    const sub= cache4subs[ctx];
     sub[k]?.push(fn);
 }
 
@@ -25,7 +26,8 @@ export function on(k,fn){
  * @param fn
  */
 export function off(k,fn){
-    let subs    = cache4subs[this];
+    ctx || (ctx = this);
+    let subs    = cache4subs[ctx];
     const index = subs [k]?.indexOf(fn);
     if (index > -1) {
         subs [k].splice(index, 1);
@@ -37,9 +39,9 @@ export function off(k,fn){
  * @param {*} params
  * @return {void}
  */
-export function emit(k,params){
-    let subs = cache4subs[this];
-    subs [k]?.forEach(fn => fn.apply(this, params));
+export function emit(k,params,ctx){
+    let subs = cache4subs[ctx];
+    subs [k]?.forEach(fn => fn.apply(ctx, params));
 }
 
 /**
@@ -74,6 +76,25 @@ export function link(vm,htp) {
     htp.on('success', rsp => vm.set && vm.set(rsp));
 }
 
-
+export function toRequest(url, data, opts){
+    let ctx  = this;
+    let type = opts.headers.get('Content-Type');
+    if(ctx?.interceptors){
+        for (const interceptor of ctx.interceptors) {
+            interceptor.apply(this, [url,data,opts]);
+        }
+    }
+    if(ctx?.parser){
+        data = ctx.parser(data);
+    }
+    data = parseHttpReq(type, data);
+    if (contentType === 'application/x-www-form-urlencoded') {
+        url += `?${data}`;
+        opts = Object.assign({}, this.opts, opts);
+    } else {
+        opts = Object.assign({}, this.constructor.opts, {body: data},opts);
+    }
+    return new Request(url, opts);
+}
 
 

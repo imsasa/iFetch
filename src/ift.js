@@ -3,7 +3,7 @@
  * @description This is the main file of the htp module.
  */
 
-import {on as $$on, emit as $$emit} from './utils.js';
+import {on as $$on, emit as $$emit,toRequest as $$toRequest, toRequest} from './utils.js';
 import resolveHttpResponse          from './resolve-http-res.js';
 
 function createController(tim) {
@@ -27,7 +27,20 @@ const Ift = {
      * @see module:sub.on
      */
     on: $$on,
+    bind: function ($req,  isSingle) {
+        let ifetch = this;
+        const _ = function ($data, ext) {
+            let req = isSingle!==fasle?$req.toRequest($data): $$toRequest.apply($req,[$req.url(),$data,$req.opts]);
+            return ifetch.send(req, ext);
+        };
 
+        function getter(target, key, receiver) {
+            return key === 'send' ? _ : target[key];
+        }
+    
+        return new Proxy(ifetch, {get: getter});
+    },
+    
     /**
     * The send function.
     * @method Ift.send
@@ -40,17 +53,18 @@ const Ift = {
     * @method Ift#send
     * @see Ift#send
     */
-    send: async function ($req, info) {
-       let ths = this, opt = {}, ret;
+    send: async function ($req, $ext) {
+       let ths = this, opt = {};
        let req = req.toRequest ? $req.toRequest() : $req;
+       let ret ;
        if (!req) {
-           let info = {code: 400, message: e.message};
-           Reflect.apply($$emit, ths, ['fail', [info,$req]]);
-           return info;
+           ret = {code: 400, message: e.message};
+           $$emit('fail',[ret,req,$ext],ths);
+           return ret;
        }
        info = info === undefined ? $req : info;
-       Reflect.apply($$emit, ths, ['start', [req, info, ths]]);
-       opt.signal = createController(this.timeout)
+       $$emit('start',[{req, ext:$ext}], ths);
+       opt.signal = createController(ths.timeout);
        ret = await fetch(req, opt).then(async (rsp) => {
            /**
             * 基础解析，解析http请求的返回结果
@@ -60,21 +74,21 @@ const Ift = {
             * 针对接口的数据解析，如果在请求对象中定义了responseResolver，则使用请求对象中的responseResolver
             */
            if ($req.resolver) {
-               ret = await $req.resolver.apply($req, [ret, info]);
+               ret = await $req.resolver(ret, $ext);
            }
            /**
             * 针对具体请求操作的解析
             */
            if (ths.resolver) {
-               ret = await ths.resolver.apply(this, [ret, info, req]);
+               ret = await ths.resolver(ret, $ext);
            }
-           Reflect.apply($$emit, ths, ['success', [req, info, ths]]);
+           $$emit('success', [ret, req, $ext], ths);
            return ret;
        }).catch(e => {
-           Reflect.apply($$emit, ths, ['fail', [{code: '0000', message: e.message}, info, this, req]]);
+           $$emit('fail',[{code: '0000', message: e.message}, req, $ext], ths);
            return ret;
        });
-       Reflect.apply($$emit, ths, ['complete', [ret, info, this, req]]);
+       $$emit('complete',[ret, req, $ext], ths);
        return ret;
    },
 
@@ -90,7 +104,7 @@ const Ift = {
     * @see Ift.get
     */
     get: function (req) {
-        return this.send(req, {method: 'GET'});
+        return this.send(req);
     },
 
     /**
@@ -105,40 +119,9 @@ const Ift = {
     * @see Ift.post
     */
     post: function (req) {
-        return this.send(req, {method: 'POST'});
+        return this.send(req);
     },
 }
-
-// export  default class Ift {
-//     static parser = undefined;
-//     resolver;
-//     constructor({timeout, parser, ...opts} = {}) {
-//         this.timeout  = timeout || this.constructor.timeout;
-//         this.resolver = this.resolver || this.constructor.resolver;
-//     }
-// }
-
-// Object.assign(Ift, proto);
-// Object.assign(Ift.prototype, proto);
-// /**
-//  * 全局方法，全来创建一个Htp类
-//  * @param resolver
-//  * @param timeout
-//  * @param {Object} opts
-//  * @return {Ift}
-//  */
-// export  function defineIFetch({resolver, timeout, ...opts} = {}) {
-//     class _ extends Ift {
-//         constructor(opts = {}) {
-//             super(opts);
-//         }
-
-//         static timeout  = timeout;
-//         static resolver = resolver;
-//     }
-
-//     return _;
-// }
 
 /**
  * @description This is the main class of the request module.
