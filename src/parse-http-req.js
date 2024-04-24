@@ -5,14 +5,20 @@ const parsers = {
         data.forEach((k, v) => formData.append(k, v));
         return formData;
     },
-    'urlencoded': data => {
+    'url': data => {
         const  searchParams = new URLSearchParams(data);
         return searchParams.toString();
     }
 };
-export default async function parseHttpReq(contentType, data) {
+export default async function parseHttpReq(type, data) {
     // 用正则从contentType中匹配jons、xml、text等
-    const match = contentType.match(/json|form|text|blob/) || ['blob'];
-    const key   = match && match[0];
+    if(!data) return;
+    let key;
+    if(type.indexOf('url')){
+        key ="url";
+    }else{
+        const match = type.match(/json|form|text|blob/) || ['blob'];
+        key   = match && match[0];
+    }
     return key ? await parsers[key](data) : data;
 }

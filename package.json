@@ -2,7 +2,7 @@
   "name": "iFetch",
   "version": "1.0.0",
   "description": "一个对fetch的封装库",
-  "main": "src/ift.js",
+  "private": true,
   "scripts": {
     "gendoc": "jsdoc -c jsdoc.conf.json"
   },
@@ -20,7 +20,9 @@
     "jsdoc": "^3.6.11",
     "mocha": "^10.2.0",
     "mochawesome": "^4.1.0",
-    "nyc": "^13.3.0"
+    "nyc": "^13.3.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
   },
   "keywords": [],
   "author": "",

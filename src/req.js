@@ -5,33 +5,37 @@
  * @module module:req
  */
 
-import { toRequest } from './utils.js';
+import {toRequest} from './utils.js';
+
 const REQS = new WeakMap();
 
-export let  req = {
-    opts:{ },
+export const req = {
+    opts: {},
     /**
      *
-     * @param  {Headers|Object}$headers
+     * @param  {Headers|Object} [$headers]
      * @param  {Boolean} [$override = false]
      * @return {Headers}
      */
-    headers: function( $headers, $override ){
-        let headersEntries;
+    headers: function ($headers, $override) {
+        let headersEntries, headers;
         let opts = REQS.get(this);
         if (arguments.length === 0) {
             return opts.headers;
         }
-        if (arguments.length !== 0 && $headers) {
-             headersEntries = Array.isArray($headers) ? $headers : Object.entries($headers);
+        if ($headers && $headers instanceof Headers) {
+            headers = $headers;
+        } else {
+            $headers       = {};
+            headersEntries = Array.isArray($headers) ? $headers : Object.entries($headers);
+            headers        = new Headers(headersEntries);
         }
-        if( $override !== true ){
-            let headers = opts.headers;
-            headersEntries.forEach(([k, v]) => headers.set(k, v));
-        }else{
-            opts.headers = new Headers(headersEntries);
+        if ($override !== true) {
+            headers.forEach((k, v) => opts.headers.set(k, v));
+        } else {
+            opts.headers = headers;
         }
-        return this;
+        return opts.headers;
     },
 
     /**
@@ -40,27 +44,27 @@ export let  req = {
      * @param $override
      * @return {data|any}
      */
-    data: function  ($data, $override) {
+    data: function ($data, $override) {
         let opts = REQS.get(this);
         if (arguments.length !== 0) {
             $override !== true ? Object.assign(opts.data, $data) : opts.data = $data;
-        } 
+        }
         return opts.data;
     },
-  
+
     /**
-     * @method Req#toRequest
+     * @method req#toRequest
      * @param {*} data 请求参数数据
-     * @param {Object} [opts]  
-     * @returns {Request} 
+     * @param {Object} [opts]
+     * @returns {Request}
      */
 
 
     toRequest(data) {
-        let opts  = REQS.get(this);
-        url  = this.url();
-        data = this.data(data);
-        return toRequest.apply(this,[url,data,opts]);
+        let opts = REQS.get(this);
+        let url  = this.url();
+        data     = data ? this.data(data) : this.data();
+        return toRequest.apply(this, [url, data, opts]);
     },
 
     /**
@@ -68,7 +72,7 @@ export let  req = {
      * @param data
      * @return {*}
      */
-    parser(data){
+    parser(data) {
         return data;
     },
 
@@ -77,55 +81,66 @@ export let  req = {
      * @param data
      * @return {*}
      */
-    resolver(data){
+    resolver(data) {
         return data;
     },
     /**
      * @ignore
-     * @param $url
-     * @return {String|Req}
+     * @param {String} [$url]
+     * @return {String}
      */
-    url: function($url){
-        if($url) REQ_URLS.set(this,$url);
-        return $url ? this:REQ_URLS.get(this);
+    url: function ($url) {
+        if ($url) REQS.set(this, $url);
+        return REQS.get(this)
     },
-    method(v){
+    method(v) {
         let opts = REQS.get(this);
-        return v?opts['method']=v:opts['method'];
+        return v ? opts['method'] = v : opts['method'];
     },
-    interceptors:[]
+    interceptors: []
 }
 
 
-
-function overrideReqProp(v,prop,obj){
-    if(typeof v === 'function'){   
-        let fn = v;
-        let _  = req.url;
-        obj[prop] = function($url){
-            let v = fn.apply(this, [$url]);
-            obj.opts.url = _.call(this,v.apply(this,[$url]));
+function overrideReqProp(v, prop, obj) {
+    if (typeof v === 'function') {
+        const fn  = v;
+        const _   = obj[prop];
+        obj[prop] = function (v, opts) {
+            v              = fn.apply(this, [v, opts]);
+            obj.opts[prop] = _.apply(this, v.apply(this, [v, opts]));
         };
-    }else if(v !== undefined){
+    } else if (v !== undefined) {
         obj.opts[prop] = v;
     }
 }
 
 
 /**
- * 
+ *
  */
-export function defineRequest($opts,$config = {}) {
-    let _req  = Object.create(req);
-    if(typeof $opts ==='string'){
-        $opts={url:$opts};
+export default function defineRequest($opts, $config = {}) {
+    let _req = Object.create(req);
+    if (typeof $opts === 'string') {
+        $opts = {url: $opts};
     }
-    const {url,method, data, headers,...opts} = $opts;
-    const {parser,resolver,interceptors}      = $config;
+    let {url, method = "GET", data, headers, ...opts} = $opts;
+    let {parser, resolver, interceptors = []}         = $config;
     REQS.set(_req, opts);
-    Object.defineProperty(_req,'opts',{get:()=>REQS.get(_req)});
+    Object.defineProperty(_req, 'opts', {get: () => REQS.get(_req)});
     _req.interceptors = [...interceptors, ...req.interceptors];
-    _req.headers(headers);
+    headers           = _req.headers(headers, true);
+    if (!_req.headers().get('Content-Type')) {
+        switch (method) {
+            case "GET":
+                headers.set('Content-Type', 'application/x-www-form-urlencoded');
+                break;
+            case "POST":
+                headers.set('Content-Type', 'application/json');
+                break;
+        }
+    }
+    opts.data = {};
+    _req.method(method);
     overrideReqProp(data, 'data', _req); // ($url, 'url', _req)(resolver,'resolver',_req)(parser,'parser',_req);
     overrideReqProp(url, 'url', _req);
     overrideReqProp(resolver, 'resolver', _req);
