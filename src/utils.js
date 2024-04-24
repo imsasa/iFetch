@@ -71,7 +71,7 @@ export function toRequest(url, data, opts) {
     if (ctx?.parser) {
         data = ctx.parser(data);
     }
-    data = parseHttpReq(type, data);
+    data =  parseHttpReq(type, data);
     if (type === 'application/x-www-form-urlencoded') {
         url += `?${data}`;
         opts = Object.assign({}, this.opts, opts);

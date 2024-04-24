@@ -10,7 +10,7 @@ const parsers = {
         return searchParams.toString();
     }
 };
-export default async function parseHttpReq(type, data) {
+export default  function parseHttpReq(type, data) {
     // 用正则从contentType中匹配jons、xml、text等
     if(!data) return;
     let key;
@@ -20,5 +20,5 @@ export default async function parseHttpReq(type, data) {
         const match = type.match(/json|form|text|blob/) || ['blob'];
         key   = match && match[0];
     }
-    return key ? await parsers[key](data) : data;
+    return key ?  parsers[key](data) : data;
 }

@@ -91,7 +91,7 @@ export const req = {
      */
     url: function ($url) {
         if ($url) REQS.set(this, $url);
-        return REQS.get(this)
+        return REQS.get(this).url;
     },
     method(v) {
         let opts = REQS.get(this);
