@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-htp-Htp.html">Htp</a></li><li><a href="module-req-Req.html">Req</a><ul class='methods'><li data-type='method'><a href="module-req-Req.html#data">data</a></li><li data-type='method'><a href="module-req-Req.html#headers">headers</a></li><li data-type='method'><a href="module-req-Req.html#parser">parser</a></li><li data-type='method'><a href="module-req-Req.html#responseParser">responseParser</a></li><li data-type='method'><a href="module-req-Req.html#toRequest">toRequest</a></li><li data-type='method'><a href="module-req-Req.html#url">url</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-htp.html">htp</a></li><li><a href="module-req.html">req</a><ul class='methods'><li data-type='method'><a href="module-req.html#.defineRequest">defineRequest</a></li></ul></li><li><a href="module-utils.html">utils</a><ul class='methods'><li data-type='method'><a href="module-utils.html#.bind">bind</a></li><li data-type='method'><a href="module-utils.html#.defineIFetch">defineIFetch</a></li><li data-type='method'><a href="module-utils.html#.emit">emit</a></li><li data-type='method'><a href="module-utils.html#.link">link</a></li><li data-type='method'><a href="module-utils.html#.off">off</a></li><li data-type='method'><a href="module-utils.html#.on">on</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IFetch.html">IFetch</a><ul class='methods'><li data-type='method'><a href="IFetch.html#bind">bind</a></li><li data-type='method'><a href="IFetch.html#get">get</a></li><li data-type='method'><a href="IFetch.html#on">on</a></li><li data-type='method'><a href="IFetch.html#post">post</a></li><li data-type='method'><a href="IFetch.html#send">send</a></li><li data-type='method'><a href="IFetch.html#un">un</a></li></ul></li><li><a href="Interceptor.html">Interceptor</a><ul class='methods'><li data-type='method'><a href="Interceptor.html#off">off</a></li><li data-type='method'><a href="Interceptor.html#use">use</a></li></ul></li><li><a href="IRequest.html">IRequest</a><ul class='methods'><li data-type='method'><a href="IRequest.html#parser">parser</a></li><li data-type='method'><a href="IRequest.html#resolver">resolver</a></li><li data-type='method'><a href="IRequest.html#toRequest">toRequest</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-ift.html">ift</a><ul class='methods'><li data-type='method'><a href="module-ift.html#.defineIFetch">defineIFetch</a></li></ul></li><li><a href="module-req.html">req</a><ul class='methods'><li data-type='method'><a href="module-req.html#.defineIRequest">defineIRequest</a></li></ul></li></ul>
     
 </nav>
 
@@ -48,6 +48,8 @@
 <header>
     
         
+            
+        
     
 </header>
 
@@ -56,6 +58,87 @@
         <div class="container-overview">
         
             
+                <div class="description usertext"><p>This is the main file of the htp module.</p></div>
+            
+
+            
+                
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>This is the main file of the htp module.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="req.js.html">req.js</a>, <a href="req.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             
         
@@ -67,13 +150,6 @@
     
 
     
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="module-req-Req.html">Req</a></dt>
-            <dd></dd>
-        </dl>
-    
     
     
 
@@ -81,6 +157,88 @@
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".irequest"><span class="type-signature type-signature-static">(static) </span>irequest<span class="type-signature"> :<a href="IRequest.html">IRequest</a></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>The complete Triforce, or one or more components of the Triforce.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="req.js.html">req.js</a>, <a href="req.js.html#line136">line 136</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>The complete Triforce, or one or more components of the Triforce.</p>
+</div>
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="IRequest.html">IRequest</a></span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
     
 
     
@@ -91,7 +249,7 @@
 
     
 
-    <h4 class="name" id=".defineRequest"><span class="type-signature type-signature-static">(static) </span>defineRequest<span class="signature">($url, $opts)</span><span class="type-signature"> &rarr; {<a href="Req.html">Req</a>}</span></h4>
+    <h4 class="name" id=".defineIRequest"><span class="type-signature type-signature-static">(static) </span>defineIRequest<span class="signature">($opts, $config)</span><span class="type-signature"> &rarr; {<a href="IRequest.html">IRequest</a>}</span></h4>
 
     
 
@@ -101,13 +259,13 @@
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Creates a request class.</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>创建一个IRequest对象</p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="req.js.html">req.js</a>, <a href="req.js.html#line212">line 212</a>
+        <a href="req.js.html">req.js</a>, <a href="req.js.html#line143">line 143</a>
     </li></ul></dd>
     
 
@@ -179,37 +337,13 @@
 
         <tr>
             
-                <td class="name"><code>$url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The URL for the request.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>$opts</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Object</span>
 
 
 
@@ -220,7 +354,31 @@
 
             
 
-            <td class="description last"><p>The options for the request.</p></td>
+            <td class="description last"><p>request配置,同Request</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
@@ -245,12 +403,6 @@
 <h5 class="h5-returns">Returns:</h5>
 
         
-<div class="param-desc">
-    <ul>
-<li>The request class.</li>
-</ul>
-</div>
-
 
 
 <dl class="param-type">
@@ -259,7 +411,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Req.html">Req</a></span>
+<span class="param-type"><a href="IRequest.html">IRequest</a></span>
 
 
 
@@ -290,7 +442,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Apr 17 2024 16:13:07 GMT+0800 (China Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Sun May 05 2024 16:00:42 GMT+0800 (中国标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

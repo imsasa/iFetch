@@ -8,14 +8,15 @@ const parsers = {
     'url': data => {
         const  searchParams = new URLSearchParams(data);
         return searchParams.toString();
-    }
+    },
+    'urlencode':data=>encodeURIComponent(data)
 };
 export default  function parseHttpReq(type, data) {
     // 用正则从contentType中匹配jons、xml、text等
     if(!data) return;
     let key;
     if(type.indexOf('url')){
-        key ="url";
+        key = typeof data==='object'?"url" : 'urlencode';
     }else{
         const match = type.match(/json|form|text|blob/) || ['blob'];
         key   = match && match[0];

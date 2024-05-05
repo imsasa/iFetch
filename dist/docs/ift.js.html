@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-htp-Htp.html">Htp</a></li><li><a href="module-req-Req.html">Req</a><ul class='methods'><li data-type='method'><a href="module-req-Req.html#data">data</a></li><li data-type='method'><a href="module-req-Req.html#headers">headers</a></li><li data-type='method'><a href="module-req-Req.html#parser">parser</a></li><li data-type='method'><a href="module-req-Req.html#responseParser">responseParser</a></li><li data-type='method'><a href="module-req-Req.html#toRequest">toRequest</a></li><li data-type='method'><a href="module-req-Req.html#url">url</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-htp.html">htp</a></li><li><a href="module-req.html">req</a><ul class='methods'><li data-type='method'><a href="module-req.html#.defineRequest">defineRequest</a></li></ul></li><li><a href="module-utils.html">utils</a><ul class='methods'><li data-type='method'><a href="module-utils.html#.bind">bind</a></li><li data-type='method'><a href="module-utils.html#.defineIFetch">defineIFetch</a></li><li data-type='method'><a href="module-utils.html#.emit">emit</a></li><li data-type='method'><a href="module-utils.html#.link">link</a></li><li data-type='method'><a href="module-utils.html#.off">off</a></li><li data-type='method'><a href="module-utils.html#.on">on</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IFetch.html">IFetch</a><ul class='methods'><li data-type='method'><a href="IFetch.html#bind">bind</a></li><li data-type='method'><a href="IFetch.html#get">get</a></li><li data-type='method'><a href="IFetch.html#on">on</a></li><li data-type='method'><a href="IFetch.html#post">post</a></li><li data-type='method'><a href="IFetch.html#send">send</a></li><li data-type='method'><a href="IFetch.html#un">un</a></li></ul></li><li><a href="Interceptor.html">Interceptor</a><ul class='methods'><li data-type='method'><a href="Interceptor.html#off">off</a></li><li data-type='method'><a href="Interceptor.html#use">use</a></li></ul></li><li><a href="IRequest.html">IRequest</a><ul class='methods'><li data-type='method'><a href="IRequest.html#parser">parser</a></li><li data-type='method'><a href="IRequest.html#resolver">resolver</a></li><li data-type='method'><a href="IRequest.html#toRequest">toRequest</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-ift.html">ift</a><ul class='methods'><li data-type='method'><a href="module-ift.html#.defineIFetch">defineIFetch</a></li></ul></li><li><a href="module-req.html">req</a><ul class='methods'><li data-type='method'><a href="module-req.html#.defineIRequest">defineIRequest</a></li></ul></li></ul>
     
 </nav>
 
@@ -46,155 +46,200 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @module htp
- * @description This is the main file of the htp module.
+ * @file ift.js
+ * @module module:ift
+ * @description 该模块提供了一些用于网络请求的方法和对象。
  */
 
-import {on as $$on, emit as $$emit} from './utils.js';
-import resolveHttpResponse          from './resolve-http-res.js';
+import {on as $$on, un as $$un, emit as $$emit} from './utils.js';
+import resolveHttpResponse                      from './resolve-http-res.js';
+import Interceptor,{tri}                        from './interceptor.js';
+
+/**
+ * @private
+ * @ignore
+ * @param {*} tim 超时时间 
+ */
 
 function createController(tim) {
+    if (tim === undefined) return;
     const controller = new AbortController();
     setTimeout(() => controller.abort(), tim);
     return controller.signal;
 }
 
-/**
- * @private
- * @description 这是一个包含通用方法的对象。
- */
-const proto = {
-    /**
-     * @method Ift#on
-     * @see module:sub.on
-     */
-    /**
-     * @method Ift.on
-     * @see module:sub.on
-     */
-    on: $$on,
-
-    /**
-    * The send function.
-    * @method Ift.send
-    * @param $req
-    * @param info
-    * @return {Promise&lt;{code: number, message}|*>}
-    */
-   /**
-    * The send function.
-    * @method Ift#send
-    * @see Ift#send
-    */
-    send: async function ($req, info) {
-       let ths = this, opt = {}, ret;
-       let req = req.toRequest ? $req.toRequest() : $req;
-       if (!req) {
-           let info = {code: 400, message: e.message};
-           Reflect.apply($$emit, ths, ['fail', info]);
-           return info;
-       }
-       info = info === undefined ? $req : info;
-       Reflect.apply($$emit, ths, ['start', [req, info, ths]]);
-       if(this.timeout){
-            opt.signal = createController(this.timeout)
-       }
-       ret = await fetch(req, opt).then(async (rsp) => {
-           /**
-            * 基础解析，解析http请求的返回结果
-            */
-           let ret = await resolveHttpResponse(rsp, ths);
-           /**
-            * 针对接口的数据解析，如果在请求对象中定义了responseResolver，则使用请求对象中的responseResolver
-            */
-           if ($req.resolver) {
-               ret = await $req.resolver.apply($req, [ret, info]);
-           }
-           /**
-            * 针对具体请求操作的解析
-            */
-           if (ths.resolver) {
-               ret = await ths.resolver.apply(this, [ret, info, req]);
-           }
-           Reflect.apply($$emit, ths, ['success', [req, info, ths]]);
-           return ret;
-       }).catch(e => {
-           Reflect.apply($$emit, ths, ['fail', [{code: '0000', message: e.message}, info, this, req]]);
-           return ret;
-       });
-       Reflect.apply($$emit, ths, ['complete', [ret, info, this, req]]);
-       return ret;
-   },
-
-    /**
-     * The get function.
-     * @function Ift.get
-     * @param {any} data - The data parameter.
-     * @returns {any} The result of the send function with method 'GET'.
-     */
-    /**
-    * The get .
-    * @method Ift#get
-    * @see Ift.get
-    */
-    get: function (req) {
-        return this.send(req, {method: 'GET'});
-    },
-
-    /**
-     * The post function.
-     * @function Ift.post
-     * @param {any} data - The data parameter.
-     * @returns {any} The result of the send function with method 'POST'.
-     */
-    /**
-    * The send function.
-    * @method Ift#post
-    * @see Ift.post
-    */
-    post: function (req) {
-        return this.send(req, {method: 'POST'});
-    },
-
-    // /**
-    //  * The bindReq function.
-    //  * @function Fetch.bindReq
-    //  * @type {Function}
-    //  */
-    // /**
-    // * The send function.
-    // * @method Fetch#bindReq
-    // * @see Fetch.bindReq
-    // */
-
-  
-    // /**
-    // * The send function.
-    // * @method Fetch#link
-    // * @see Fetch.link
-    // */
-
+function toRequest($req,$data, $ext) {
+    if(!$req)  return;
+    let [data, ext] = tri.apply(this.interceptors.request, [[$data, $ext], this]);
+    return $req.toRequest(data,ext);
 }
-export  default class Ift {
-    static parser = undefined;
-    resolver;
+
+
+async function send($req, $ext){
+    let req = $req,ths = this, ret;
+    if (!req || typeof req ==='string') {
+        ret = {code: 400, message: req||"请求错误"};
+        $$emit('fail', [ret, req, $ext], ths);
+        return ret;
+    }
+
+    $$emit('start', [{req, ext: $ext}], ths);
+    if(!($req instanceof Request)){
+        $ext??= req;
+        req = new Request(req.url,req);
+    }
+    let opt = {
+        signal: createController(ths.timeout)
+    };
+    ret        = await fetch(req, opt).then(async (rsp) => {
+        /**
+         * 基础解析，解析http请求的返回结果
+         */
+        let ret = await resolveHttpResponse(rsp, ths);
+        /**
+         * 针对接口的数据解析，如果在请求对象中定义了responseResolver，则使用请求对象中的responseResolver
+         */
+        if ($req.resolver) {j
+            ret = await $req.resolver(ret, $ext);
+        }
+        if(ths.req.interceptors?.response){
+            ret = tri.apply(ths.req.interceptors.response, [[ret, $ext], ths]);
+        }
+        /**
+         * 针对具体请求操作的解析
+         */
+        if (ths.resolver) {
+            ret = await ths.resolver(ret, $ext);
+        }
+        tri.apply(ths.interceptors.response, [[$data, $ext], ths])
+        $$emit('success', [ret, req, $ext], ths);
+        return ret;
+    }).catch(e => {
+        $$emit('fail', [{code: '0000', message: e.message}, req, $ext], ths);
+        return ret;
+    });
+    $$emit('complete', [ret, req, $ext], ths);
+    return ret;
+}
+ /**
+  * @alias IFetch
+  * @inner
+  * @private
+*/
+class IFetch {
+    constructor({interceptors,timeout,resolver}={}) {
+        /**
+        * @property {Object} interceptors
+        * @property {Interceptor} interceptors.request
+        * @property {Interceptor} interceptors.response
+        * @description ift对象的拦截器属性，可以用于在请求发送前或响应返回后进行一些处理。
+        */
+        this.interceptors = {
+            request:  new Interceptor(interceptors?.request),
+            response: new Interceptor(interceptors?.response)
+        };
+        if (timeout!==undefined) {
+            _.timeout = timeout;
+        }
+        if (typeof resolver === 'function') {
+            _.resolver = resolver;
+        }
+      }
     /**
-     * @description This is the main class of the request module.
-     * @constructor
-     * @name Htp
-     * @param timeout
-     * @param parser
-     * @param opts
+     * @method 
+     * @description 注册一个事件处理器
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 事件处理器
      */
-    constructor({timeout, parser, ...opts} = {}) {
-        this.timeout  = timeout || this.constructor.timeout;
-        this.resolver = this.resolver || this.constructor.resolver;
+    on  = $$on;
+   /**
+     * @method
+     * @description 移除一个事件处理器
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 事件处理器
+     */
+    un  = $$un;
+    /**
+     * @method 
+     * @description 绑定一个事件处理器
+     * @param {string} event - 事件名称
+     * @param {Function} handler - 事件处理器
+     */
+    bind= function ($req) {
+        return new Proxy(this,
+            {
+                get: function (target, key, receiver) {
+                    return key === 'req'?$req:Reflect.get(target, key, receiver);
+                }
+            });
+    };
+   /**
+    * @method
+    * @description 发送一个POST请求
+    * @param {string} url - 请求的URL
+     * @param {Object} data - 请求的数据
+     * @returns {Promise} 返回一个Promise对象
+     */
+    post = function($data, $ext){
+        let $opts    = toRequest.apply(this.req, [this.req, $data, $ext]);
+        if($opts){
+            $opts.method = 'POST';
+        }
+        return send.apply(this,[$opts, $ext]);
+    };
+   /**
+     * @method 
+     * @description 发送一个GET请求
+     * @param {string} url - 请求的URL
+     * @param {Object} params - 请求的参数
+     * @returns {Promise} 返回一个Promise对象
+     */
+    get = function($data, $ext){
+        let $opts    = toRequest.apply(this,[this.req,$data, $ext]);
+        if($opts){
+            $opts.method = 'POST';
+        }
+        return send.apply(this,[$opts, $ext]);
+    };
+   /**
+     * @method
+     * @description 发送一个请求
+     * @param {string} method - 请求的方法
+     * @param {string} url - 请求的URL
+     * @param {Object} data - 请求的数据
+     * @returns {Promise} 返回一个Promise对象
+     */
+    send = function($data, $ext){
+        let $opts = toRequest.apply(this, [this.req, $data, $ext]);
+        return send.apply(this,[$opts, $ext]);
     }
 }
 
-Object.assign(Ift, proto);
-Object.assign(Ift.prototype, proto);
-</code></pre>
+
+/**
+ * The complete Triforce, or one or more components of the Triforce.
+ * @name module:ift.ifetch
+ * @type {IFetch}
+ * 
+ */
+export const ifetch= new IFetch();
+/**
+ * @function module:ift.defineIFetch
+ * @description 定义一个IFetch方法
+ * @param {Object} options - 配置选项
+ * @returns {IFetch} 
+ */
+export default function defineIFetch({resolver, timeout, interceptors={}} = {}) {
+    let its = ifetch.interceptors;
+    const _ = new IFetch({
+        resolver,timeout,
+        interceptors:{
+            request:[interceptors.request].concat(its.request.get()),
+           response:[interceptors.response].concat(its.response.get())
+       }
+    });
+    return _;
+}</code></pre>
         </article>
     </section>
 
@@ -208,7 +253,7 @@ Object.assign(Ift.prototype, proto);
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Apr 17 2024 16:13:07 GMT+0800 (China Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Sun May 05 2024 16:00:42 GMT+0800 (中国标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

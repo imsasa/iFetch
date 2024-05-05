@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module-htp-Htp.html">Htp</a></li><li><a href="module-req-Req.html">Req</a><ul class='methods'><li data-type='method'><a href="module-req-Req.html#data">data</a></li><li data-type='method'><a href="module-req-Req.html#headers">headers</a></li><li data-type='method'><a href="module-req-Req.html#parser">parser</a></li><li data-type='method'><a href="module-req-Req.html#responseParser">responseParser</a></li><li data-type='method'><a href="module-req-Req.html#toRequest">toRequest</a></li><li data-type='method'><a href="module-req-Req.html#url">url</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-htp.html">htp</a></li><li><a href="module-req.html">req</a><ul class='methods'><li data-type='method'><a href="module-req.html#.defineRequest">defineRequest</a></li></ul></li><li><a href="module-utils.html">utils</a><ul class='methods'><li data-type='method'><a href="module-utils.html#.bind">bind</a></li><li data-type='method'><a href="module-utils.html#.defineIFetch">defineIFetch</a></li><li data-type='method'><a href="module-utils.html#.emit">emit</a></li><li data-type='method'><a href="module-utils.html#.link">link</a></li><li data-type='method'><a href="module-utils.html#.off">off</a></li><li data-type='method'><a href="module-utils.html#.on">on</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IFetch.html">IFetch</a><ul class='methods'><li data-type='method'><a href="IFetch.html#bind">bind</a></li><li data-type='method'><a href="IFetch.html#get">get</a></li><li data-type='method'><a href="IFetch.html#on">on</a></li><li data-type='method'><a href="IFetch.html#post">post</a></li><li data-type='method'><a href="IFetch.html#send">send</a></li><li data-type='method'><a href="IFetch.html#un">un</a></li></ul></li><li><a href="Interceptor.html">Interceptor</a><ul class='methods'><li data-type='method'><a href="Interceptor.html#off">off</a></li><li data-type='method'><a href="Interceptor.html#use">use</a></li></ul></li><li><a href="IRequest.html">IRequest</a><ul class='methods'><li data-type='method'><a href="IRequest.html#parser">parser</a></li><li data-type='method'><a href="IRequest.html#resolver">resolver</a></li><li data-type='method'><a href="IRequest.html#toRequest">toRequest</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-ift.html">ift</a><ul class='methods'><li data-type='method'><a href="module-ift.html#.defineIFetch">defineIFetch</a></li></ul></li><li><a href="module-req.html">req</a><ul class='methods'><li data-type='method'><a href="module-req.html#.defineIRequest">defineIRequest</a></li></ul></li></ul>
     
 </nav>
 
@@ -47,32 +47,36 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * @module utils
+ * @ignore
  * @description util set
  */
-
-import Ift from './ift.js';
-import Req from './req.js';
+import parseHttpReq from "./parse-http-req.js";
 
 const cache4subs = new WeakMap();
 
 /**
  * @param k
  * @param fn
+ * @param ctx
  */
-export function on(k,fn){
-    if(!cache4subs[this]){
-        cache4subs[this] = new Subscribers();
+export function on(k, fn, ctx) {
+    ctx || (ctx = this);
+    if (!cache4subs[ctx]) {
+        cache4subs[ctx] = {};
     }
-    const sub= cache4subs[this];
-    sub[k]?.push(fn);
+    const sub = cache4subs[ctx];
+    sub[k] || (sub[k] = []);
+    sub[k].push(fn);
 }
 
 /**
  * @param k
  * @param fn
+ * @param ctx
  */
-export function off(k,fn){
-    let subs    = cache4subs[this];
+export function un(k, fn, ctx) {
+    ctx || (ctx = this);
+    let subs    = cache4subs[ctx];
     const index = subs [k]?.indexOf(fn);
     if (index > -1) {
         subs [k].splice(index, 1);
@@ -82,63 +86,36 @@ export function off(k,fn){
 /**
  * @param {string} k
  * @param {*} params
+ * @param ctx
  * @return {void}
  */
-export function emit(k,params){
-    let subs = cache4subs[this];
-    subs [k]?.forEach(fn => fn.apply(this, params));
-}
-
-/**
- * bind request and htp
- * @param {*} $req
- * @param {*} ifetch
- * @param {*} isSingle
- * @return {Ift}
- */
-export function bind($req, ifetch, isSingle) {
-    const _ = function (data, info) {
-        const req = isSingle !== false ? $req.data(data).toRequest() : $req.toRequest(data);
-        return ifetch.send(req, info || data);
-    };
-
-    function getter(target, key, receiver) {
-        return key === 'send' ? _ : target[key];
+export function emit(k, params, ctx) {
+    let subs = cache4subs[ctx];
+    if(subs &amp;&amp; subs[k]){
+        subs[k].forEach(fn => fn.apply(ctx, params));
     }
-
-    return new Proxy(ifetch, {get: getter});
 }
 
 /**
  * The link function.
  * @param {any} vm - The vm parameter.
- * @param {Ift} htp - The ifetch parameter.
+ * @param {ift} htp - The ifetch parameter.
  * @return {void}
-*/
-export function link(vm,htp) {
+ */
+export function link(vm, htp) {
     htp.on('before', () => vm.loading = true);
     htp.on('complete', () => vm.loading = false);
     htp.on('success', rsp => vm.set &amp;&amp; vm.set(rsp));
 }
-/**
- * 全局方法，全来创建一个Htp类
- * @param resolver
- * @param timeout
- * @param {Object} opts
- * @return {Ift}
- */
-export  function defineIFetch({resolver, timeout, ...opts} = {}) {
-    class _ extends Ift {
-        constructor(opts = {}) {
-            super(opts);
-        }
-
-        static timeout  = timeout;
-        static resolver = resolver;
-    }
-
-    return _;
-}
+// method: 请求的方法，例如：GET, POST。
+// headers: 任何你想加到请求中的头，其被放在Headers对象或内部值为ByteString 的对象字面量中。
+// body: 任何你想加到请求中的 body，可以是Blob, BufferSource, FormData, URLSearchParams, USVString，或ReadableStream对象。注意GET 和 HEAD 请求没有 body。
+// mode: 请求的模式，比如 cors, no-cors, same-origin, 或 navigate。默认值为 cors。
+// credentials: 想要在请求中使用的 credentials：: omit, same-origin, 或 include。默认值应该为omit。但在 Chrome 中，Chrome 47 之前的版本默认值为 same-origin ，自 Chrome 47 起，默认值为 include。
+// cache: 请求中想要使用的 cache mode
+// redirect: 对重定向处理的模式： follow, error, or manual。在 Chrome 中，Chrome 47 之前的版本默认值为 manual，自 Chrome 47 起，默认值为 follow。
+// referrer: 一个指定了no-referrer, client, 或一个 URL 的 USVString 。默认值是about:client。
+// integrity: 包括请求的 subresource integrity 值 (e.g., sha256-BpfBw7ivV8q2jLiT13fxDYAe2tJllusRSZ273h2nFSE=).
 
 
 
@@ -156,7 +133,7 @@ export  function defineIFetch({resolver, timeout, ...opts} = {}) {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Wed Apr 17 2024 16:13:07 GMT+0800 (China Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Sun May 05 2024 16:00:42 GMT+0800 (中国标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

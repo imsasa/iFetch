@@ -2,7 +2,9 @@
   "name": "iFetch",
   "version": "1.0.0",
   "description": "一个对fetch的封装库",
+  "type": "module",
   "private": true,
+  "main": "./src/index.js",
   "scripts": {
     "gendoc": "jsdoc -c jsdoc.conf.json"
   },

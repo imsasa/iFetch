@@ -29,7 +29,7 @@
 <nav >
     
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="module.exports.html">exports</a><ul class='methods'><li data-type='method'><a href="module.exports.html#data">data</a></li><li data-type='method'><a href="module.exports.html#url">url</a></li></ul></li><li><a href="module-htp-Htp.html">Htp</a></li></ul><h3>Modules</h3><ul><li><a href="module-htp.html">htp</a></li><li><a href="module-utils.html">utils</a><ul class='methods'><li data-type='method'><a href="module-utils.html#.bind">bind</a></li><li data-type='method'><a href="module-utils.html#.defineIFetch">defineIFetch</a></li><li data-type='method'><a href="module-utils.html#.defineRequest">defineRequest</a></li><li data-type='method'><a href="module-utils.html#.emit">emit</a></li><li data-type='method'><a href="module-utils.html#.link">link</a></li><li data-type='method'><a href="module-utils.html#.off">off</a></li><li data-type='method'><a href="module-utils.html#.on">on</a></li></ul></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IFetch.html">IFetch</a><ul class='methods'><li data-type='method'><a href="IFetch.html#bind">bind</a></li><li data-type='method'><a href="IFetch.html#get">get</a></li><li data-type='method'><a href="IFetch.html#on">on</a></li><li data-type='method'><a href="IFetch.html#post">post</a></li><li data-type='method'><a href="IFetch.html#send">send</a></li><li data-type='method'><a href="IFetch.html#un">un</a></li></ul></li><li><a href="IRequest.html">IRequest</a><ul class='methods'><li data-type='method'><a href="IRequest.html#parser">parser</a></li><li data-type='method'><a href="IRequest.html#resolver">resolver</a></li><li data-type='method'><a href="IRequest.html#toRequest">toRequest</a></li></ul></li><li><a href="module.exports.html">exports</a></li></ul><h3>Modules</h3><ul><li><a href="module-ift.html">ift</a><ul class='methods'><li data-type='method'><a href="module-ift.html#.defineIFetch">defineIFetch</a></li></ul></li><li><a href="module-req.html">req</a><ul class='methods'><li data-type='method'><a href="module-req.html#.defineIRequest">defineIRequest</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#un">un</a></li><li><a href="global.html#use">use</a></li></ul>
     
 </nav>
 
@@ -53,8 +53,6 @@
         
         </h2>
         
-            <div class="class-description usertext"><p>Req类</p></div>
-        
     
 </header>
 
@@ -65,10 +63,8 @@
             
 
     
-    <h2>Constructor</h2>
-    
 
-    <h4 class="name" id="exports"><span class="type-signature"></span>new exports<span class="signature">($data, $headers, fetor, $opts)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="exports"><span class="type-signature"></span>new exports<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -81,7 +77,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="req.js.html">req.js</a>, <a href="req.js.html#line46">line 46</a>
+        <a href="interceptor.js.html">interceptor.js</a>, <a href="interceptor.js.html#line5">line 5</a>
     </li></ul></dd>
     
 
@@ -126,104 +122,6 @@
 
 
 
-
-
-    <h5 class="h5-parameters">Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>$data</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>$headers</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>fetor</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>$opts</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -262,368 +160,6 @@
     
 
     
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id="data"><span class="type-signature"></span>data<span class="signature">($data<span class="signature-attributes">opt</span>, flagOverride)</span><span class="type-signature"> &rarr; {Object|this}</span></h4>
-
-    
-
-
-
-
-<dl class="details">
-    
-    <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Gets or sets the body data for the request.</p></li></ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="req.js.html">req.js</a>, <a href="req.js.html#line76">line 76</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5 class="h5-parameters">Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>$data</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>flagOverride</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">*</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5 class="h5-returns">Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-|
-
-<span class="param-type">this</span>
-
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="url"><span class="type-signature"></span>url<span class="signature">($url)</span><span class="type-signature"> &rarr; {string|this}</span></h4>
-
-    
-
-
-
-
-<dl class="details">
-    
-    <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Gets or sets the URL for the request.</p></li></ul></dd>
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="req.js.html">req.js</a>, <a href="req.js.html#line65">line 65</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <h5 class="h5-parameters">Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>$url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">*</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5 class="h5-returns">Returns:</h5>
-
-        
-
-
-<dl class="param-type">
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-|
-
-<span class="param-type">this</span>
-
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-    
 
     
 
@@ -642,7 +178,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Mon Apr 15 2024 17:42:13 GMT+0800 (China Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a> on Sun May 05 2024 15:43:14 GMT+0800 (中国标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
