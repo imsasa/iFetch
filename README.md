@@ -5,4 +5,7 @@
  npm i https://github.com/imsasa/iFetch.git
  ```
 ## api
-https://imsasa.github.io/ifetch/IFetch.html#body
+https://imsasa.github.io/ifetch/index.html
+
+## example
+./example/
